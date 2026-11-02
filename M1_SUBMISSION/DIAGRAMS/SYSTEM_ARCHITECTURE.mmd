@@ -1,0 +1,51 @@
+graph TD
+    subgraph ClientBrowser ["Client Web Browser (Zero-Backend Execution)"]
+        subgraph PresentationLayer ["Presentation & UI Layer (React 18 + Tailwind CSS)"]
+            UI_Nav["Sidebar Navigation & Header<br/>(Sidebar.tsx, Header.tsx)"]
+            UI_Config["NFA Configuration Module<br/>(NFAConfigForm.tsx, NFATransitionTable.tsx)"]
+            UI_Visualizer["Automata Visualization Canvas<br/>(AutomatonGraph.tsx, StateNode.tsx, AutomatonEdge.tsx)"]
+            UI_Stepper["Step-by-Step Conversion Engine<br/>(ConversionStepper.tsx, StepExplanationCard.tsx, IntermediateDFATable.tsx)"]
+            UI_Table["Transition Table & Exporter<br/>(DFATransitionTable.tsx)"]
+            UI_Tester["String Testing & Verification<br/>(StringTester.tsx, ExecutionTrace.tsx, BatchTestRunner.tsx)"]
+            UI_Docs["Academic Documentation View<br/>(TheoryDocumentation.tsx)"]
+        end
+
+        subgraph StateManagement ["State Coordination (App.tsx)"]
+            ReactState["Root Reactive State<br/>• nfa: NFA<br/>• activeTab: NavTabId<br/>• stepIndex: number<br/>• currentPresetId: string | null"]
+            MemoHook["useMemo Hook<br/>convertNFAtoDFA(nfa)"]
+        end
+
+        subgraph ComputationalCore ["Core Automata Logic Layer (TypeScript Engine)"]
+            Core_Validator["Input Validation Engine<br/>(subsetConstruction.ts: validateNFA)"]
+            Core_Algorithm["Subset Construction Engine<br/>(subsetConstruction.ts: convertNFAtoDFA)"]
+            Core_Union["Transition Union Computer<br/>(subsetConstruction.ts: computeSubsetTransition)"]
+            Core_Simulator["String Simulator Engine<br/>(stringSimulator.ts: simulateDFA, simulateNFA)"]
+            Core_Layout["Graph Layout Engine<br/>(layoutGraph.ts: layoutAutomatonGraph)"]
+            Core_Export["Data Export Utility<br/>(exportUtils.ts: dfaToCSV, dfaToMarkdown)"]
+            Core_Presets["Benchmark Library<br/>(presets.ts: PRESET_AUTOMATA)"]
+        end
+
+        subgraph ExternalLibraries ["Vendor Libraries"]
+            Lib_ReactFlow["@xyflow/react (v12)<br/>Interactive Node-Edge Canvas"]
+            Lib_Dagre["dagre (v0.8.5)<br/>Hierarchical Directed Graph Layout"]
+            Lib_Lucide["lucide-react<br/>Academic UI Iconography"]
+        end
+    end
+
+    UI_Config -->|User edits NFA| ReactState
+    ReactState --> MemoHook
+    MemoHook --> Core_Validator
+    Core_Validator -->|If Valid| Core_Algorithm
+    Core_Algorithm --> Core_Union
+    Core_Algorithm -->|DFA Object + Steps[]| ReactState
+
+    ReactState --> UI_Stepper
+    ReactState --> UI_Table
+    ReactState --> UI_Tester
+
+    UI_Tester --> Core_Simulator
+    UI_Table --> Core_Export
+
+    UI_Visualizer --> Core_Layout
+    Core_Layout --> Lib_Dagre
+    UI_Visualizer --> Lib_ReactFlow

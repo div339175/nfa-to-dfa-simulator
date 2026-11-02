@@ -1,0 +1,93 @@
+classDiagram
+    class App {
+        +nfa: NFA
+        +activeTab: NavTabId
+        +stepIndex: number
+        +currentPresetId: string | null
+        +conversionResult: ConversionResult
+        +handleNfaChange(updatedNfa: NFA): void
+        +handleSelectPreset(preset: PresetAutomaton): void
+    }
+
+    class NFAConfigForm {
+        +nfa: NFA
+        +onChange(updatedNfa: NFA): void
+        +onApplyPreset(preset: PresetAutomaton): void
+        +editorMode: 'matrix' | 'form'
+        +handleAddState(): void
+        +handleRemoveState(state: string): void
+        +handleAddSymbol(): void
+        +handleRemoveSymbol(sym: string): void
+    }
+
+    class NFATransitionTable {
+        +nfa: NFA
+        +onChange(updatedNfa: NFA): void
+        +toggleDestination(from: string, sym: string, target: string): void
+        +clearCell(from: string, sym: string): void
+    }
+
+    class SubsetConstructionEngine {
+        +validateNFA(nfa: NFA): NFAValidationResult
+        +getCanonicalSubsetKey(states: string[]): string
+        +formatSubset(states: string[]): string
+        +getStateLabel(index: number): string
+        +computeSubsetTransition(nfa: NFA, subset: string[], symbol: string)
+        +convertNFAtoDFA(nfa: NFA, options: ConvertOptions): ConversionResult
+    }
+
+    class StringSimulator {
+        +simulateDFA(dfa: DFA, inputString: string): SimulationResult
+        +simulateNFA(nfa: NFA, inputString: string): boolean
+    }
+
+    class AutomatonGraph {
+        +type: 'NFA' | 'DFA'
+        +nfa: NFA
+        +dfa: DFA
+        +activeStateId: string
+        +layoutDirection: 'LR' | 'TB'
+    }
+
+    class StateNode {
+        +data: AutomatonGraphNodeData
+        +isInitial: boolean
+        +isFinal: boolean
+        +isCurrent: boolean
+    }
+
+    class AutomatonEdge {
+        +data: AutomatonEdgeData
+        +isSelfLoop: boolean
+        +hasMutual: boolean
+        +isBackward: boolean
+        +symbolsLabel: string
+    }
+
+    class ConversionStepper {
+        +currentStepIndex: number
+        +totalSteps: number
+        +onStepChange(updater): void
+    }
+
+    class IntermediateDFATable {
+        +step: ConversionStep
+        +alphabet: string[]
+    }
+
+    class DFATransitionTable {
+        +dfa: DFA
+        +handleDownloadCSV(): void
+        +handleCopyMarkdown(): void
+    }
+
+    App --> NFAConfigForm
+    NFAConfigForm --> NFATransitionTable
+    App --> SubsetConstructionEngine
+    App --> AutomatonGraph
+    AutomatonGraph --> StateNode
+    AutomatonGraph --> AutomatonEdge
+    App --> ConversionStepper
+    App --> IntermediateDFATable
+    App --> DFATransitionTable
+    App --> StringSimulator

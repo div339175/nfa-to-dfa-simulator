@@ -1,0 +1,48 @@
+flowchart TD
+    Start([Start: convertNFAtoDFA]) --> Validate[Validate NFA Specification]
+    Validate --> ValidCheck{Validation Passed?}
+    ValidCheck -- No --> ReturnError[Return Failure & Error Messages]
+    
+    ValidCheck -- Yes --> InitQueue[Initialize Empty Queue Q_process and Sets]
+    InitQueue --> CreateStartSubset[Start Subset S0 = {q0}]
+    CreateStartSubset --> LabelStart[Assign Sequential Label 'A' to S0]
+    LabelStart --> AddStartQueue[Enqueue 'A' into Q_process]
+    AddStartQueue --> RecordStep1[Record Step 1: Type INITIALIZE]
+
+    RecordStep1 --> QueueCheck{Is Q_process Empty?}
+    
+    QueueCheck -- No --> DequeueState[Dequeue currentLabel, get Subset S]
+    DequeueState --> MarkProcessed[Add currentLabel to processedStates]
+
+    MarkProcessed --> IsDeadState{Is S == Empty Set ∅?}
+    IsDeadState -- Yes --> HandleDead[For all a in Σ: δ'(∅, a) = ∅]
+    HandleDead --> QueueCheck
+
+    IsDeadState -- No --> LoopSymbols[For each alphabet symbol a in Σ]
+    LoopSymbols --> ComputeUnion[Compute U = ⋃ δ_NFA(q, a) for all q in S]
+    ComputeUnion --> CanonicalSort[Sort and Deduplicate U to make Canonical Key]
+
+    CanonicalSort --> CheckEmptyU{Is U Empty ∅?}
+    CheckEmptyU -- Yes --> AssignTrap[targetLabel = '∅' Trap State]
+    CheckEmptyU -- No --> ExistsCheck{Does Key exist in subsetToLabel?}
+
+    ExistsCheck -- Yes --> AssignExisting[targetLabel = subsetToLabel(Key)]
+    ExistsCheck -- No --> GenerateNewLabel[Generate Next Label e.g. B, C, D]
+    GenerateNewLabel --> RegisterNewState[Add targetLabel to dfaStates & stateSubsets]
+    RegisterNewState --> CheckAccepting{Does U contain any NFA Final State?}
+    CheckAccepting -- Yes --> MarkDFAFinal[Add targetLabel to dfaFinalStates]
+    CheckAccepting -- No --> EnqueueNew[Enqueue targetLabel into Q_process]
+    MarkDFAFinal --> EnqueueNew
+    EnqueueNew --> SetTargetLabel[targetLabel = Generated Label]
+
+    AssignTrap --> RecordTrans[Set dfaTransitions(currentLabel, a) = targetLabel]
+    AssignExisting --> RecordTrans
+    SetTargetLabel --> RecordTrans
+
+    RecordTrans --> SnapshotStep[Record ConversionStep with formula, union, and table snapshot]
+    SnapshotStep --> MoreSymbols{More symbols in Σ?}
+    MoreSymbols -- Yes --> LoopSymbols
+    MoreSymbols -- No --> QueueCheck
+
+    QueueCheck -- Yes --> FinalStep[Record Step: Type COMPLETE]
+    FinalStep --> ReturnDFA([Return DFA Object & Complete Steps History])

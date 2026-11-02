@@ -1,0 +1,49 @@
+flowchart TD
+    Start([User Opens Application]) --> LoadInitial[Load Default Mandatory Benchmark NFA]
+    LoadInitial --> DisplayDashboard[Render Dashboard Overview]
+
+    DisplayDashboard --> UserAction{Select Application Tab}
+
+    UserAction -->|Tab: NFA Configuration| ConfigMode[Open NFA Config Editor]
+    ConfigMode --> EditOption{Edit Method}
+    EditOption -->|Load Preset| PickPreset[Choose from Preset Library]
+    EditOption -->|Custom Definition| ManualEdit[Define Q, Σ, q0, F and δ]
+    PickPreset --> TriggerValidation[Run validateNFA]
+    ManualEdit --> TriggerValidation
+
+    TriggerValidation --> CheckValid{Is NFA Valid?}
+    CheckValid -->|No| ShowErrors[Display Error / Warning Alert Banners]
+    ShowErrors --> ConfigMode
+    CheckValid -->|Yes| AutoConvert[Trigger convertNFAtoDFA via useMemo]
+
+    UserAction -->|Tab: NFA Visualization| RenderNFAGraph[Compute Dagre Layout & Render NFA Nodes/Edges]
+    
+    AutoConvert --> StoreDFA[Store Generated DFA & Conversion Steps]
+
+    UserAction -->|Tab: Step-by-Step Conversion| StepperView[Render Conversion Stepper]
+    StoreDFA --> StepperView
+    StepperView --> StepControls{User Control}
+    StepControls -->|Next / Prev| UpdateStepIndex[Change safeStepIndex]
+    StepControls -->|Auto-Play| PlayTimer[Start Interval Timer 0.5x, 1x, 2x]
+    StepControls -->|Show All| JumpEnd[Jump to Final Step]
+    UpdateStepIndex --> RenderStepCard[Display StepExplanationCard & IntermediateDFATable]
+    PlayTimer --> RenderStepCard
+    JumpEnd --> RenderStepCard
+
+    UserAction -->|Tab: DFA Visualization| RenderDFAGraph[Compute Dagre Layout & Render DFA Nodes with Subsets]
+    StoreDFA --> RenderDFAGraph
+
+    UserAction -->|Tab: Transition Tables| TablesView[Display Side-by-Side NFA and DFA Tables]
+    StoreDFA --> TablesView
+    TablesView --> ExportAction{Export Format}
+    ExportAction -->|CSV| DownloadCSV[Trigger Browser CSV Download]
+    ExportAction -->|Markdown| CopyMD[Copy GitHub Flavored Table to Clipboard]
+
+    UserAction -->|Tab: String Simulator| SimView[Open String Tester & Tape Interface]
+    StoreDFA --> SimView
+    SimView --> EnterString[User Enters String w or selects preset]
+    EnterString --> RunSim[Execute simulateDFA]
+    RunSim --> TraceDisplay[Render Execution Trace Table]
+    RunSim --> TapeDisplay[Highlight Consumed Tape Characters]
+    RunSim --> SyncGraph[Pulse Active State Node in DFA Diagram]
+    RunSim --> ShowVerdict[Display ACCEPTED / REJECTED Banner]

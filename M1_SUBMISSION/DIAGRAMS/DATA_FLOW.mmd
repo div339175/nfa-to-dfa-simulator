@@ -1,0 +1,27 @@
+graph LR
+    User([User / Student]) -->|1. Inputs States, Alphabet, Transitions| NFAConfig[NFA Configuration UI]
+    NFAConfig -->|2. Raw NFA Object| Validator[Input Validator Engine]
+    
+    Validator -->|If Invalid: Errors & Warnings| AlertUI[NFA Validation Alert UI]
+    AlertUI -->|Feedback Loop| User
+
+    Validator -->|3. Valid NFA Object| Converter[Subset Construction Engine]
+    
+    Converter -->|4. Power Set Generation & BFS Queue| PowersetCore[Set Union Computer]
+    PowersetCore -->|5. Canonical Key Generator| Deduplicator[Deduplication & State Labeller]
+    Deduplicator -->|6. Step Snapshot Array| StepsStore[(Conversion Steps Store)]
+    Deduplicator -->|7. Converted DFA Object| DFAStore[(DFA Data Object)]
+
+    StepsStore -->|Step Snapshots| StepperUI[Step-by-Step Conversion Stepper]
+    StepsStore -->|Current Matrix State| InterTableUI[Intermediate DFA Matrix UI]
+
+    DFAStore -->|DFA Structure| LayoutEngine[Dagre Graph Layout Engine]
+    LayoutEngine -->|2D Coordinates + Handles| GraphUI[React Flow Visualizer Canvas]
+    DFAStore -->|Transitions Map| TableUI[Complete DFA Transition Table]
+    TableUI -->|CSV / Markdown| Downloader[Client-Side File Export]
+
+    User -->|8. Input String 'w'| SimEngine[String Simulator Engine]
+    DFAStore -->|Deterministic Transitions| SimEngine
+    SimEngine -->|9. Step-by-Step Execution Trace| TraceUI[Execution Trace Table]
+    SimEngine -->|10. Active State ID| GraphUI
+    SimEngine -->|11. ACCEPTED / REJECTED Verdict| VerdictUI[Result Status Banner]
