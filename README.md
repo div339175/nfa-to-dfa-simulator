@@ -38,30 +38,30 @@ This project provides an educational simulation platform that visualizes the the
 ## 3. System Architecture & UML Component Diagram
 
 ```mermaid
-graph TD
-    subgraph UI ["User Interface Layer"]
-        A[Sidebar & Navigation] --> B[Dashboard Overview]
-        A --> C[NFA Configuration Form & Matrix]
-        A --> D[NFA Graph Visualizer]
-        A --> E[Step-by-Step Conversion Stepper]
-        A --> F[DFA Graph Visualizer]
-        A --> G[Transition Tables & CSV Export]
-        A --> H[String Simulator & Batch Suite]
-        A --> I[Theory Documentation]
+flowchart TD
+    subgraph UI["User Interface Layer"]
+        A["Sidebar & Navigation"] --> B["Dashboard Overview"]
+        A --> C["NFA Configuration Form & Matrix"]
+        A --> D["NFA Graph Visualizer"]
+        A --> E["Step-by-Step Conversion Stepper"]
+        A --> F["DFA Graph Visualizer"]
+        A --> G["Transition Tables & CSV Export"]
+        A --> H["String Simulator & Batch Suite"]
+        A --> I["Theory Documentation"]
     end
 
-    subgraph Core ["Core Automata Logic Layer (TypeScript)"]
-        J[subsetConstruction.ts]
-        K[stringSimulator.ts]
-        L[layoutGraph.ts]
-        M[exportUtils.ts]
-        N[presets.ts]
+    subgraph Core["Core Automata Logic Layer (TypeScript)"]
+        J["subsetConstruction.ts"]
+        K["stringSimulator.ts"]
+        L["layoutGraph.ts"]
+        M["exportUtils.ts"]
+        N["presets.ts"]
     end
 
-    subgraph Libraries ["External Visualization & Layout Engines"]
-        O[@xyflow/react - React Flow]
-        P[Dagre Graph Layout]
-        Q[Lucide Icons]
+    subgraph Libraries["External Visualization & Layout Engines"]
+        O["@xyflow/react (React Flow)"]
+        P["Dagre Graph Layout"]
+        Q["Lucide React Icons"]
     end
 
     C --> J
@@ -90,26 +90,26 @@ Given an NFA $M = (Q, \Sigma, \delta, q_0, F)$:
 
 ```mermaid
 flowchart TD
-    Start([Start]) --> Init[Initialize queue with start subset S0 = {q0}]
-    Init --> LabelStart[Assign label A to S0, add to Q']
-    LabelStart --> CheckQueue{Is queue empty?}
-    CheckQueue -- Yes --> MarkFinals[Identify DFA final states F' where S ∩ F ≠ ∅]
-    MarkFinals --> Complete([Return DFA M' & Conversion Steps])
+    Start(["Start"]) --> Init["Initialize queue with start subset S0 = {q0}"]
+    Init --> LabelStart["Assign label A to S0, add to Q'"]
+    LabelStart --> CheckQueue{"Is queue empty?"}
+    CheckQueue -->|Yes| MarkFinals["Identify DFA final states where subset contains NFA final state"]
+    MarkFinals --> Complete(["Return DFA M' and Conversion Steps"])
     
-    CheckQueue -- No --> Dequeue[Dequeue state S]
-    Dequeue --> ForEachSymbol[For each symbol a in Σ]
-    ForEachSymbol --> ComputeUnion["Compute U = ⋃ δ(q, a) for all q ∈ S"]
-    ComputeUnion --> CheckEmpty{Is U empty?}
-    CheckEmpty -- Yes --> TrapState[Set U = Dead State ∅]
-    CheckEmpty -- No --> CheckExists{Is U already in Q'?}
+    CheckQueue -->|No| Dequeue["Dequeue state S"]
+    Dequeue --> ForEachSymbol["For each symbol a in alphabet"]
+    ForEachSymbol --> ComputeUnion["Compute U = Union of delta(q, a) for all q in S"]
+    ComputeUnion --> CheckEmpty{"Is U empty?"}
+    CheckEmpty -->|Yes| TrapState["Set U = Dead/Trap State (empty set)"]
+    CheckEmpty -->|No| CheckExists{"Is U already in Q'?"}
     TrapState --> CheckExists
-    CheckExists -- No --> NewState[Assign new label to U, add to Q' and enqueue]
-    CheckExists -- Yes --> ExistingState[Map transition to existing state label]
-    NewState --> RecordStep[Record step snapshot and update DFA table]
+    CheckExists -->|No| NewState["Assign new label to U, add to Q' and enqueue"]
+    CheckExists -->|Yes| ExistingState["Map transition to existing state label"]
+    NewState --> RecordStep["Record step snapshot and update DFA table"]
     ExistingState --> RecordStep
-    RecordStep --> NextSymbol{More symbols in Σ?}
-    NextSymbol -- Yes --> ForEachSymbol
-    NextSymbol -- No --> CheckQueue
+    RecordStep --> NextSymbol{"More symbols in alphabet?"}
+    NextSymbol -->|Yes| ForEachSymbol
+    NextSymbol -->|No| CheckQueue
 ```
 
 ---
