@@ -147,4 +147,82 @@ describe('Subset Construction Edge Cases', () => {
     expect(conv.success).toBe(false);
     expect(conv.error).toBeDefined();
   });
+
+  it('handles NFA where initial state is also accepting (accepts empty string)', () => {
+    const nfaInitialAccept: NFA = {
+      states: ['q0', 'q1'],
+      alphabet: ['0', '1'],
+      initialState: 'q0',
+      finalStates: ['q0'],
+      transitions: {
+        q0: { '0': ['q1'], '1': [] },
+        q1: { '0': [], '1': ['q0'] },
+      },
+    };
+    const res = convertNFAtoDFA(nfaInitialAccept);
+    expect(res.success).toBe(true);
+    // DFA start state 'A' contains q0, so A must be in finalStates
+    expect(res.dfa.finalStates).toContain(res.dfa.initialState);
+
+    // Empty string must be accepted
+    const sim = simulateDFA(res.dfa, '');
+    expect(sim.accepted).toBe(true);
+  });
+
+  it('prunes unreachable NFA states from generated DFA state space', () => {
+    const nfaWithUnreachable: NFA = {
+      states: ['q0', 'q1', 'q_ghost'],
+      alphabet: ['a'],
+      initialState: 'q0',
+      finalStates: ['q1'],
+      transitions: {
+        q0: { a: ['q1'] },
+        q1: { a: ['q1'] },
+        q_ghost: { a: ['q1'] }, // No transitions lead to q_ghost
+      },
+    };
+    const res = convertNFAtoDFA(nfaWithUnreachable);
+    expect(res.success).toBe(true);
+    // None of the DFA states should contain q_ghost
+    for (const state of res.dfa.states) {
+      const subset = res.dfa.stateSubsets[state];
+      expect(subset).not.toContain('q_ghost');
+    }
+  });
+
+  it('handles single-state NFA properly', () => {
+    const singleStateNFA: NFA = {
+      states: ['q0'],
+      alphabet: ['0', '1'],
+      initialState: 'q0',
+      finalStates: ['q0'],
+      transitions: {
+        q0: { '0': ['q0'], '1': ['q0'] },
+      },
+    };
+    const res = convertNFAtoDFA(singleStateNFA);
+    expect(res.success).toBe(true);
+    expect(res.dfa.states.length).toBe(1);
+    expect(res.dfa.transitions['A']['0']).toBe('A');
+    expect(res.dfa.transitions['A']['1']).toBe('A');
+    expect(res.dfa.finalStates).toContain('A');
+  });
+
+  it('handles NFA with multiple final states correctly', () => {
+    const multiFinalNFA: NFA = {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a'],
+      initialState: 'q0',
+      finalStates: ['q1', 'q2'],
+      transitions: {
+        q0: { a: ['q1', 'q2'] },
+        q1: { a: [] },
+        q2: { a: [] },
+      },
+    };
+    const res = convertNFAtoDFA(multiFinalNFA);
+    expect(res.success).toBe(true);
+    // B = {q1, q2} contains both final states, so B must be marked final
+    expect(res.dfa.finalStates).toContain('B');
+  });
 });
