@@ -2,9 +2,6 @@
 
 **Project Title:** Interactive NFA to DFA Conversion Simulator using Subset Construction Algorithm  
 **Course:** Automata Theory & Formal Languages (Theory of Computation)  
-**Evaluation Scheme:** Final Semester / M-Evaluation (Total: 9 Marks)  
-**Authors:** Student Project Team (5 Members)  
-**Repository:** [https://github.com/div339175/nfa-to-dfa-simulator](https://github.com/div339175/nfa-to-dfa-simulator)  
 **Tech Stack:** React 19, TypeScript 5.8, Tailwind CSS, React Flow (@xyflow/react), Dagre, Vite, Vitest  
 
 ---
